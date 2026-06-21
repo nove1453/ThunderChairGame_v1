@@ -9,8 +9,8 @@ const playerClasses = ["p1", "p2"];
 
 const gameState = {
   players: [
-    { id: 0, name: "プレイヤー1", score: 0, shocks: 0, history: [] },
-    { id: 1, name: "プレイヤー2", score: 0, shocks: 0, history: [] }
+    { id: 0, name: "浜ちゃん", score: 0, shocks: 0, history: [] },
+    { id: 1, name: "まっちゃん", score: 0, shocks: 0, history: [] }
   ],
   firstSetterIndex: 0,
   trapSetterIndex: 0,
