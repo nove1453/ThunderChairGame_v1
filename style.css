@@ -1,5 +1,10 @@
 :root {
   color-scheme: light;
+  --viewport-height: 100dvh;
+  --title-size: clamp(20px, 6vw, 30px);
+  --small-text: clamp(10px, 2.7vw, 13px);
+  --button-height: clamp(44px, 6.4dvh, 56px);
+  --board-size: min(86vw, 340px);
   --bg: #ffffff;
   --panel: #ffffff;
   --panel-2: #f8fafc;
@@ -23,8 +28,12 @@
 
 html,
 body {
+  width: 100%;
+  height: 100%;
   margin: 0;
-  min-height: 100%;
+  min-height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
   background: var(--bg);
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -32,7 +41,6 @@ body {
 }
 
 body {
-  overflow-x: hidden;
   background:
     radial-gradient(circle at 50% 42%, rgba(37, 132, 218, 0.08), transparent 34%),
     linear-gradient(180deg, #ffffff 0%, #fbfdff 64%, #ffffff 100%),
@@ -51,32 +59,65 @@ button {
 }
 
 .app-shell {
-  min-height: 100svh;
+  height: var(--viewport-height);
+  min-height: 100dvh;
   width: min(100%, 430px);
   margin: 0 auto;
-  padding: 18px 14px calc(16px + var(--safe-bottom));
+  padding: 0;
+  overflow: hidden;
 }
 
 .screen {
-  min-height: calc(100svh - 28px - var(--safe-bottom));
+  min-height: 100dvh;
+  height: var(--viewport-height);
   display: flex;
   flex-direction: column;
   gap: 14px;
+  padding: 18px 14px calc(16px + var(--safe-bottom));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.game-screen {
+  width: 100%;
+  height: var(--viewport-height);
+  min-height: var(--viewport-height);
+  max-height: var(--viewport-height);
+  overflow: hidden;
+  padding:
+    max(6px, env(safe-area-inset-top))
+    10px
+    max(8px, env(safe-area-inset-bottom));
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+  gap: clamp(4px, 0.8dvh, 8px);
+}
+
+.game-screen.phase-handover,
+.game-screen.phase-turn-result {
+  grid-template-rows: auto auto minmax(0, 1fr);
+}
+
+.result-screen,
+.setup-screen {
+  overflow-y: auto;
 }
 
 .topbar {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 12px;
+  gap: clamp(6px, 1.5vw, 12px);
   align-items: center;
+  min-height: 0;
 }
 
 .title {
   margin: 0;
   color: #ffec44;
-  font-size: clamp(1.58rem, 8vw, 2.2rem);
+  font-size: var(--title-size);
   font-weight: 1000;
-  line-height: 1.1;
+  line-height: 1;
+  white-space: nowrap;
   text-shadow:
     2px 0 #0b0c0f,
     -2px 0 #0b0c0f,
@@ -107,18 +148,18 @@ button {
 }
 
 .timer {
-  min-width: 64px;
-  min-height: 64px;
+  min-width: clamp(46px, 12vw, 64px);
+  min-height: clamp(46px, 12vw, 64px);
   display: grid;
   place-items: center;
-  padding: 8px;
+  padding: clamp(5px, 1.2dvh, 8px);
   border: 0;
   border-radius: 50%;
   background: var(--green);
   color: #fff;
   box-shadow: 0 8px 18px rgba(47, 166, 67, 0.28);
   text-align: center;
-  font-size: 1.45rem;
+  font-size: clamp(1rem, 5vw, 1.45rem);
   font-weight: 1000;
 }
 
@@ -171,18 +212,19 @@ button {
   min-width: 100%;
   border-collapse: collapse;
   color: #111827;
-  font-size: 0.94rem;
+  font-size: var(--small-text);
   font-weight: 800;
 }
 
 .score-table th,
 .score-table td {
-  min-width: 40px;
-  padding: 10px 10px;
+  min-width: clamp(28px, 8.4vw, 40px);
+  padding: clamp(2px, 0.55dvh, 6px) clamp(5px, 1.8vw, 9px);
   border-right: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
   text-align: right;
   white-space: nowrap;
+  line-height: 1.08;
 }
 
 .score-table th:last-child,
@@ -200,7 +242,7 @@ button {
   position: sticky;
   left: 0;
   z-index: 2;
-  min-width: 94px;
+  min-width: clamp(72px, 22vw, 94px);
   text-align: left;
   background: var(--panel);
 }
@@ -209,9 +251,9 @@ button {
   position: sticky;
   right: 0;
   z-index: 3;
-  min-width: 48px;
+  min-width: clamp(40px, 11vw, 48px);
   background: #eff8ff;
-  font-size: 1.08rem;
+  font-size: clamp(0.88rem, 3.5vw, 1.05rem);
   font-weight: 1000;
 }
 
@@ -226,7 +268,8 @@ button {
 .status {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: clamp(4px, 1vw, 7px);
+  min-height: 0;
 }
 
 .status-card,
@@ -240,32 +283,41 @@ button {
 }
 
 .status-card {
-  padding: 10px;
+  min-height: 0;
+  padding: clamp(4px, 0.8dvh, 7px) clamp(6px, 1.6vw, 9px);
 }
 
 .status-label {
   color: var(--muted);
-  font-size: 0.75rem;
+  font-size: clamp(0.62rem, 2.4vw, 0.75rem);
+  line-height: 1.05;
 }
 
 .status-value {
-  margin-top: 4px;
+  margin-top: clamp(1px, 0.3dvh, 3px);
   font-weight: 800;
+  font-size: clamp(0.76rem, 3vw, 0.98rem);
+  line-height: 1.08;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .chair-stage {
   position: relative;
-  flex: 1;
-  min-height: 370px;
+  min-height: 0;
+  height: 100%;
+  overflow: visible;
   display: grid;
   place-items: center;
 }
 
 .chair-ring {
   position: relative;
-  width: min(92vw, 48svh, 390px);
-  height: min(92vw, 48svh, 390px);
+  width: var(--board-size);
+  height: var(--board-size);
   max-width: 100%;
+  max-height: 100%;
   aspect-ratio: 1;
 }
 
@@ -273,19 +325,19 @@ button {
   position: absolute;
   left: calc(var(--x) * 1%);
   top: calc(var(--y) * 1%);
-  width: clamp(48px, 13vw, 58px);
-  height: clamp(48px, 13vw, 58px);
+  width: clamp(34px, calc(var(--board-size) * 0.135), 50px);
+  height: clamp(34px, calc(var(--board-size) * 0.135), 50px);
   transform: translate(-50%, -50%);
   border: 2px solid #566174;
   border-radius: 50%;
   background:
     radial-gradient(circle at 35% 28%, #222 0%, #050505 58%, #000 100%);
   color: #fff;
-  font-size: 1.35rem;
+  font-size: clamp(0.95rem, calc(var(--board-size) * 0.052), 1.28rem);
   font-weight: 900;
   box-shadow:
-    0 0 0 4px #fff,
-    0 8px 14px rgba(25, 30, 38, 0.22);
+    0 0 0 clamp(2px, calc(var(--board-size) * 0.012), 4px) #fff,
+    0 6px 12px rgba(25, 30, 38, 0.2);
 }
 
 .chair.selected {
@@ -310,13 +362,13 @@ button {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: min(42vw, 158px);
-  min-height: 86px;
+  width: 42%;
+  min-height: clamp(62px, calc(var(--board-size) * 0.25), 86px);
   transform: translate(-50%, -50%);
   display: grid;
   place-items: center;
   justify-items: center;
-  padding: 10px;
+  padding: clamp(5px, 1dvh, 10px);
   border: 2px solid var(--blue);
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.94);
@@ -324,21 +376,22 @@ button {
   box-shadow: 0 8px 22px rgba(24, 39, 75, 0.08);
   text-align: center;
   overflow-wrap: anywhere;
-  font-size: 0.88rem;
-  line-height: 1.32;
+  font-size: clamp(0.68rem, calc(var(--board-size) * 0.04), 0.88rem);
+  line-height: 1.26;
   font-weight: 800;
 }
 
 .selected-text {
-  margin-top: 5px;
+  margin-top: 3px;
   color: var(--orange);
-  font-size: 1.12rem;
+  font-size: clamp(0.9rem, calc(var(--board-size) * 0.05), 1.12rem);
 }
 
 .primary-button,
 .secondary-button {
   width: 100%;
-  min-height: 62px;
+  min-height: var(--button-height);
+  height: var(--button-height);
   border: 0;
   border-radius: 28px;
   box-shadow: 0 7px 18px rgba(24, 39, 75, 0.12);
@@ -348,7 +401,7 @@ button {
 .primary-button {
   background: linear-gradient(180deg, #1b94ed 0%, #1084df 100%);
   color: #fff;
-  font-size: 1.35rem;
+  font-size: clamp(1rem, 4.6vw, 1.35rem);
 }
 
 .primary-button:active {
@@ -428,18 +481,20 @@ button {
 .handover-box,
 .result-box {
   display: grid;
-  gap: 14px;
-  padding: 18px;
+  gap: clamp(8px, 1.4dvh, 14px);
+  padding: clamp(12px, 2dvh, 18px);
   text-align: center;
+  overflow: hidden;
 }
 
 .handover-box {
-  margin: auto 0;
+  align-self: center;
+  margin: 0;
 }
 
 .big-message {
   margin: 0;
-  font-size: 1.55rem;
+  font-size: clamp(1.25rem, 5.2vw, 1.55rem);
   line-height: 1.35;
 }
 
@@ -451,7 +506,7 @@ button {
 
 .result-title {
   margin: 0;
-  font-size: 1.65rem;
+  font-size: clamp(1.2rem, 5vw, 1.65rem);
 }
 
 .result-title.safe {
@@ -465,11 +520,11 @@ button {
 .result-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: clamp(5px, 1dvh, 8px);
 }
 
 .metric {
-  padding: 10px;
+  padding: clamp(6px, 1dvh, 10px);
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #f8fafc;
@@ -484,7 +539,7 @@ button {
 .metric strong {
   display: block;
   margin-top: 4px;
-  font-size: 1.05rem;
+  font-size: clamp(0.9rem, 3.3vw, 1.05rem);
 }
 
 .effect-overlay {
@@ -556,24 +611,120 @@ button {
   }
 }
 
-@media (max-width: 370px) {
-  .app-shell {
-    padding-inline: 10px;
+@media (max-height: 750px) {
+  :root {
+    --title-size: clamp(19px, 5.6vw, 24px);
+    --small-text: clamp(9px, 2.55vw, 12px);
+    --button-height: clamp(42px, 6.2dvh, 50px);
   }
 
-  .chair-stage {
-    min-height: 326px;
+  .game-screen {
+    gap: 4px;
+    padding:
+      max(4px, env(safe-area-inset-top))
+      8px
+      max(6px, env(safe-area-inset-bottom));
+  }
+
+  .title::before,
+  .title::after {
+    font-size: 0.58em;
+    margin-inline: 1px;
+  }
+
+  .timer {
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 0.98rem;
+  }
+
+  .score-table th,
+  .score-table td {
+    padding-top: 2px;
+    padding-bottom: 2px;
+  }
+
+  .score-table th:first-child,
+  .score-table td:first-child {
+    min-width: 68px;
+  }
+
+  .status {
+    gap: 4px;
+  }
+
+  .status-card {
+    padding-top: 3px;
+    padding-bottom: 3px;
+  }
+
+  .status-label {
+    font-size: 0.58rem;
+  }
+
+  .status-value {
+    font-size: 0.72rem;
   }
 
   .center-message {
-    width: 44vw;
-    min-height: 78px;
-    padding: 8px;
-    font-size: 0.78rem;
+    padding: 5px;
+    border-width: 1px;
+  }
+}
+
+@media (max-height: 680px) {
+  :root {
+    --title-size: 20px;
+    --button-height: 42px;
+  }
+
+  .title::before,
+  .title::after {
+    display: none;
+  }
+
+  .topbar {
+    gap: 5px;
+  }
+
+  .timer {
+    min-width: 40px;
+    min-height: 40px;
+    font-size: 0.9rem;
+  }
+
+  .score-wrap {
+    border-radius: 7px;
+  }
+
+  .score-table th,
+  .score-table td {
+    min-width: 27px;
+    padding-inline: 4px;
+  }
+
+  .score-table .total {
+    min-width: 36px;
+  }
+
+  .status-card {
+    box-shadow: none;
+  }
+
+  .center-message {
+    width: 40%;
+    min-height: 58px;
+    font-size: clamp(0.62rem, calc(var(--board-size) * 0.038), 0.76rem);
+  }
+}
+
+@media (max-width: 370px) {
+  .center-message {
+    width: 42%;
   }
 
   .chair {
-    width: 45px;
-    height: 45px;
+    min-width: 36px;
+    min-height: 36px;
   }
 }
