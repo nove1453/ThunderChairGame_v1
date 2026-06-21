@@ -4,7 +4,7 @@ const app = document.getElementById("app");
 const shockAudio = document.getElementById("shock-audio");
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-const defaultNames = ["プレイヤー1", "プレイヤー2"];
+const defaultNames = ["浜ちゃん", "まっちゃん"];
 const playerClasses = ["p1", "p2"];
 
 const gameState = {
@@ -32,6 +32,24 @@ const gameState = {
 
 if (shockAudio) {
   shockAudio.volume = 0.7;
+}
+
+function updateViewportLayout() {
+  const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+  document.documentElement.style.setProperty("--viewport-height", `${viewportHeight}px`);
+  window.requestAnimationFrame(updateBoardSize);
+}
+
+function updateBoardSize() {
+  const stage = document.querySelector(".game-screen .chair-stage");
+  const board = document.querySelector(".game-screen .chair-ring");
+  if (!stage || !board) return;
+
+  const stageRect = stage.getBoundingClientRect();
+  const availableWidth = Math.max(0, stageRect.width);
+  const availableHeight = Math.max(0, stageRect.height);
+  const boardSize = Math.max(208, Math.floor(Math.min(availableWidth, availableHeight) * 0.88));
+  board.style.setProperty("--board-size", `${boardSize}px`);
 }
 
 window.addEventListener("popstate", () => {
@@ -277,10 +295,12 @@ function render() {
   app.replaceChildren();
   if (gameState.phase === "setup") {
     app.append(renderSetup());
+    updateViewportLayout();
     return;
   }
 
-  const screen = createElement("main", { className: "screen" });
+  const screenClass = gameState.phase === "game-result" ? "screen result-screen" : `screen game-screen phase-${gameState.phase}`;
+  const screen = createElement("main", { className: screenClass });
   screen.append(renderHeader());
 
   if (gameState.phase === "handover") {
@@ -295,6 +315,7 @@ function render() {
 
   app.append(screen);
   updateTimerNode();
+  updateViewportLayout();
 }
 
 function renderSetup() {
@@ -410,7 +431,7 @@ function renderChairBoard() {
 
 function renderChair(number) {
   const angle = ((number % 12) * 30 - 90) * (Math.PI / 180);
-  const radius = 41;
+  const radius = 38.5;
   const x = 50 + Math.cos(angle) * radius;
   const y = 50 + Math.sin(angle) * radius;
   const isAvailable = gameState.availableChairs.includes(number);
@@ -608,4 +629,10 @@ document.addEventListener("visibilitychange", () => {
   if (!document.hidden && gameState.phase === "chair-selection") updateTimer();
 });
 
+window.addEventListener("resize", updateViewportLayout);
+window.addEventListener("orientationchange", updateViewportLayout);
+window.visualViewport?.addEventListener("resize", updateViewportLayout);
+window.visualViewport?.addEventListener("scroll", updateViewportLayout);
+
+updateViewportLayout();
 render();
