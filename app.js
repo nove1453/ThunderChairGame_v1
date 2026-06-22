@@ -4,13 +4,13 @@ const app = document.getElementById("app");
 const shockAudio = document.getElementById("shock-audio");
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-const defaultNames = ["浜ちゃん", "まっちゃん"];
+const defaultNames = ["プレイヤー1", "プレイヤー2"];
 const playerClasses = ["p1", "p2"];
 
 const gameState = {
   players: [
-    { id: 0, name: "浜ちゃん", score: 0, shocks: 0, history: [] },
-    { id: 1, name: "まっちゃん", score: 0, shocks: 0, history: [] }
+    { id: 0, name: "プレイヤー1", score: 0, shocks: 0, history: [] },
+    { id: 1, name: "プレイヤー2", score: 0, shocks: 0, history: [] }
   ],
   firstSetterIndex: 0,
   trapSetterIndex: 0,
@@ -156,31 +156,35 @@ function judgeResult() {
 function applySafeResult() {
   const player = gameState.players[gameState.sitterIndex];
   const chair = gameState.selectedChair;
+  const trapChair = gameState.electricChair;
+  gameState.lastResult = {
+    type: "safe",
+    chair,
+    trapChair,
+    points: chair,
+    playerIndex: gameState.sitterIndex
+  };
   player.score += chair;
   player.history.push(String(chair));
   gameState.players[gameState.trapSetterIndex].history.push("-");
   gameState.availableChairs = gameState.availableChairs.filter((number) => number !== chair);
-  gameState.lastResult = {
-    type: "safe",
-    chair,
-    points: chair,
-    playerIndex: gameState.sitterIndex
-  };
 }
 
 function applyShockResult() {
   const player = gameState.players[gameState.sitterIndex];
   const chair = gameState.selectedChair;
+  const trapChair = gameState.electricChair;
+  gameState.lastResult = {
+    type: "shock",
+    chair,
+    trapChair,
+    points: 0,
+    playerIndex: gameState.sitterIndex
+  };
   player.score = 0;
   player.shocks += 1;
   player.history.push("⚡");
   gameState.players[gameState.trapSetterIndex].history.push("-");
-  gameState.lastResult = {
-    type: "shock",
-    chair,
-    points: 0,
-    playerIndex: gameState.sitterIndex
-  };
 }
 
 function showTurnOrGameResult() {
@@ -233,6 +237,9 @@ function checkGameEnd() {
 }
 
 function switchRoles() {
+  gameState.electricChair = null;
+  gameState.selectedChair = null;
+  gameState.lastResult = null;
   const nextSetter = gameState.sitterIndex;
   gameState.sitterIndex = gameState.trapSetterIndex;
   gameState.trapSetterIndex = nextSetter;
@@ -402,9 +409,10 @@ function renderScoreTable() {
 }
 
 function getScoreDisplayOrder() {
-  const first = gameState.players[gameState.firstSetterIndex] || gameState.players[0];
-  const second = gameState.players[first.id === 0 ? 1 : 0];
-  return [first, second];
+  const firstSitterIndex = gameState.firstSetterIndex === 0 ? 1 : 0;
+  const firstSitter = gameState.players[firstSitterIndex] || gameState.players[1];
+  const firstSetter = gameState.players[gameState.firstSetterIndex] || gameState.players[0];
+  return [firstSitter, firstSetter];
 }
 
 function renderStatus() {
@@ -501,19 +509,45 @@ function renderTurnResult() {
     text: result.type === "safe" ? "回避成功！" : "電流！"
   }));
   const message = result.type === "safe"
-    ? `${result.chair}番で${result.points}ポイント獲得`
-    : `${result.chair}番で電流を受けました`;
+    ? `${result.points}ポイント獲得`
+    : `${result.chair}番の椅子は電流イスでした`;
   box.append(createElement("p", { className: "sub-message", text: message }));
-  box.append(metricGrid([
-    ["選んだイス", `${result.chair}番`],
-    ["獲得点", result.type === "safe" ? `${result.points}点` : "⚡"],
-    ["現在の得点", `${player.score}点`],
-    ["電流回数", `${player.shocks}回`],
-    ["次の電流セット", nextSetter.name],
-    ["次のイス選び", nextSitter.name]
-  ]));
+
+  if (result.type === "safe") {
+    box.append(renderChairAnswerCards(result));
+    box.append(metricGrid([
+      ["獲得点数", `${result.points}点`],
+      ["現在の合計点", `${player.score}点`],
+      ["次の電流セット", nextSetter.name],
+      ["次のイス選び", nextSitter.name]
+    ]));
+  } else {
+    box.append(metricGrid([
+      ["電流イス", `⚡ ${result.trapChair}番`],
+      ["現在の得点", `${player.score}点`],
+      ["電流回数", `${player.shocks}回`],
+      ["次の電流セット", nextSetter.name],
+      ["次のイス選び", nextSitter.name]
+    ]));
+  }
   box.append(button("次のターンへ", "primary-button", switchRoles));
   return box;
+}
+
+function renderChairAnswerCards(result) {
+  const wrap = createElement("div", { className: "answer-cards", ariaLabel: "選んだ椅子と電流イス" });
+  const selected = createElement("div", { className: "answer-card selected-answer" });
+  selected.append(
+    createElement("span", { className: "answer-label", text: "選んだ椅子" }),
+    createElement("strong", { className: "answer-number", text: `${result.chair}番` })
+  );
+  const trap = createElement("div", { className: "answer-card trap-answer" });
+  trap.append(
+    createElement("span", { className: "answer-label", text: "⚡ 電流イス" }),
+    createElement("strong", { className: "answer-number", text: `${result.trapChair}番` })
+  );
+  wrap.append(selected, trap);
+  return wrap;
 }
 
 function renderGameResult() {
