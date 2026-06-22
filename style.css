@@ -517,6 +517,46 @@ button {
   color: var(--yellow);
 }
 
+.answer-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(6px, 1dvh, 10px);
+}
+
+.answer-card {
+  display: grid;
+  align-content: center;
+  min-height: clamp(62px, 9dvh, 86px);
+  padding: clamp(7px, 1.2dvh, 12px);
+  border: 2px solid currentColor;
+  border-radius: 10px;
+  background: #fff;
+  line-height: 1.15;
+}
+
+.selected-answer {
+  color: #087b55;
+  background: #effdf7;
+}
+
+.trap-answer {
+  color: #d2382f;
+  background: #fff7e8;
+}
+
+.answer-label {
+  display: block;
+  font-size: clamp(0.72rem, 2.7vw, 0.88rem);
+  font-weight: 900;
+}
+
+.answer-number {
+  display: block;
+  margin-top: 4px;
+  font-size: clamp(1.45rem, 8vw, 2.05rem);
+  font-weight: 1000;
+}
+
 .result-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
