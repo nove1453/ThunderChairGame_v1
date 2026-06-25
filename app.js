@@ -4,13 +4,13 @@ const app = document.getElementById("app");
 const shockAudio = document.getElementById("shock-audio");
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-const defaultNames = ["プレイヤー1", "プレイヤー2"];
+const defaultNames = ["まっちゃん", "浜ちゃん"];
 const playerClasses = ["p1", "p2"];
 
 const gameState = {
   players: [
-    { id: 0, name: "プレイヤー1", score: 0, shocks: 0, history: [] },
-    { id: 1, name: "プレイヤー2", score: 0, shocks: 0, history: [] }
+    { id: 0, name: "まっちゃん", score: 0, shocks: 0, history: [] },
+    { id: 1, name: "浜ちゃん", score: 0, shocks: 0, history: [] }
   ],
   firstSetterIndex: 0,
   trapSetterIndex: 0,
