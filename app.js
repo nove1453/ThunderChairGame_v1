@@ -62,6 +62,7 @@ function startGame() {
   const name1 = document.getElementById("player1-name")?.value.trim() || defaultNames[0];
   const name2 = document.getElementById("player2-name")?.value.trim() || defaultNames[1];
   const firstSetter = Number(document.getElementById("first-setter")?.value || "0");
+  trackGameStart("setup");
   gameState.players[0].name = name1;
   gameState.players[1].name = name2;
   resetGame(false);
@@ -69,6 +70,13 @@ function startGame() {
   gameState.trapSetterIndex = firstSetter;
   gameState.sitterIndex = firstSetter === 0 ? 1 : 0;
   startTurn();
+}
+
+function trackGameStart(startMethod) {
+  if (typeof window.gtag !== "function") return;
+  window.gtag("event", "game_start", {
+    start_method: startMethod
+  });
 }
 
 function resetGame(keepPhase = true) {
@@ -566,6 +574,7 @@ function renderGameResult() {
   ]));
   box.append(renderScoreTable());
   const replay = button("もう一度遊ぶ", "primary-button", () => {
+    trackGameStart("replay");
     const setter = gameState.firstSetterIndex;
     resetGame(false);
     gameState.firstSetterIndex = setter;
